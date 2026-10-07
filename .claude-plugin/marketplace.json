@@ -1,0 +1,17 @@
+{
+  "name": "mailprobe",
+  "description": "The MailProbe plugin: the MCP server of the MailProbe email verification API and the skill that tells an assistant how to use it.",
+  "owner": {
+    "name": "Jamal Tantaoui",
+    "email": "contact@mailprobe.dev",
+    "url": "https://mailprobe.dev"
+  },
+  "plugins": [
+    {
+      "name": "mailprobe",
+      "source": "./plugin",
+      "description": "Verify email addresses in real time from your assistant: deliverability, disposable and role addresses, typo fixes. Nothing is sent to the address. Hosted in France.",
+      "category": "productivity"
+    }
+  ]
+}

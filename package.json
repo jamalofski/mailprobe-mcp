@@ -1,0 +1,27 @@
+{
+  "name": "mailprobe-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Claude Code plugin and agent skill for the MailProbe MCP server: an AI assistant verifies email addresses in real time, without sending anything. Hosted in France.",
+  "license": "MIT",
+  "homepage": "https://mailprobe.dev/api-docs/#mcp",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "author": {
+    "name": "Jamal Tantaoui",
+    "email": "contact@mailprobe.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamalofski/mailprobe-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jamalofski/mailprobe-mcp/issues"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check-tools": "node scripts/check-tools.mjs"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mailprobe": {
+      "type": "http",
+      "url": "https://mailprobe.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer ${user_config.api_key}"
+      }
+    }
+  }
+}

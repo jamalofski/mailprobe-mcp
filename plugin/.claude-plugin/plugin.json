@@ -1,0 +1,22 @@
+{
+  "name": "mailprobe",
+  "version": "1.0.0",
+  "description": "Verify email addresses in real time from your assistant: deliverability, disposable and role addresses, typo fixes. Nothing is sent to the address. Hosted in France.",
+  "author": {
+    "name": "Jamal Tantaoui",
+    "email": "contact@mailprobe.dev",
+    "url": "https://mailprobe.dev"
+  },
+  "homepage": "https://mailprobe.dev/api-docs/#mcp",
+  "repository": "https://github.com/jamalofski/mailprobe-mcp",
+  "license": "MIT",
+  "keywords": ["email verification", "email validation", "deliverability", "disposable email", "list cleaning", "mcp"],
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "MailProbe API key",
+      "description": "Starts with mp_live_. Create it under Developer in your MailProbe account: https://mailprobe.dev/dashboard/#/developer",
+      "sensitive": true
+    }
+  }
+}
