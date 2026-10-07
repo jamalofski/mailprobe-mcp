@@ -1,10 +1,11 @@
-// What the plugin, the skill, the marketplace file and the README must agree on.
+// What the npm package, the plugin, the skill, the marketplace file and the README must agree on.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { test } from 'node:test';
 
 import { SERVER_URL, namedTools, readmeTools } from '../scripts/names.mjs';
+import { TOOLS } from '../src/tools.js';
 
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
@@ -14,7 +15,14 @@ const pluginServers = require('../plugin/.mcp.json');
 
 const read = (file) => fs.readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 
-test('the plugin is at the version of the repository, and the marketplace lists it', async () => {
+test('the changelog has a section for this version, and the package ships what it runs', async () => {
+  assert.match(await read('CHANGELOG.md'), new RegExp(`^## ${pkg.version.replaceAll('.', '\\.')} `, 'm'));
+  assert.deepEqual(pkg.files, ['bin', 'src']);
+  assert.equal(pkg.bin['mailprobe-mcp'], 'bin/mailprobe-mcp.js');
+  assert.equal(pkg.dependencies, undefined);
+});
+
+test('the plugin is at the version of the package, and the marketplace of this repository lists it', () => {
   assert.equal(plugin.version, pkg.version);
   assert.equal(marketplace.plugins.length, 1);
   const [listed] = marketplace.plugins;
@@ -22,10 +30,9 @@ test('the plugin is at the version of the repository, and the marketplace lists 
   assert.equal(listed.source, './plugin');
   // Claude Code reads the version of plugin.json first: it is written there only.
   assert.equal(listed.version, undefined);
-  assert.match(await read('CHANGELOG.md'), new RegExp(`^## ${pkg.version.replaceAll('.', '\\.')} `, 'm'));
 });
 
-test('the plugin points at the MailProbe server, with the API key of its option', () => {
+test('the plugin points at the remote MailProbe server, with the API key of its option', () => {
   const server = pluginServers.mcpServers.mailprobe;
   assert.equal(server.type, 'http');
   // The address of the README: Claude Code then keeps one server when the user added it by hand too.
@@ -35,15 +42,16 @@ test('the plugin points at the MailProbe server, with the API key of its option'
   assert.equal(plugin.userConfig.api_key.sensitive, true);
 });
 
-test('the README gives the address the plugin uses', async () => {
+test('the README gives the address the plugin uses, and the command that starts this package', async () => {
   const readme = await read('README.md');
   assert.ok(readme.includes(`claude mcp add --transport http mailprobe ${SERVER_URL} `));
   assert.ok(readme.includes(`"url": "${SERVER_URL}"`));
+  assert.ok(readme.includes(`"args": ["-y", "${pkg.name}"]`));
 });
 
-test('the skill names the tools of the README, and no other', async () => {
-  const tools = readmeTools(await read('README.md'));
-  assert.ok(tools.length > 0);
+test('the README and the skill name the tools of the server, and no other', async () => {
+  const tools = TOOLS.map((tool) => tool.name);
+  assert.deepEqual(readmeTools(await read('README.md')), tools);
   assert.deepEqual(namedTools(await read('plugin/skills/mailprobe/SKILL.md')), tools);
 });
 

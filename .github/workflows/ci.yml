@@ -16,11 +16,13 @@ permissions:
 
 jobs:
   test:
-    # The tests read files of the repository: both line-ending conventions are tested.
+    # The tests start the server as a client does and read files of the repository:
+    # both systems are tested.
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -29,8 +31,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
 
-      # No dependency to install: the tests read the manifests, the skill and the README.
+      # No dependency to install: the tests run on the sources, against a fake API.
       - name: Test
         run: npm test

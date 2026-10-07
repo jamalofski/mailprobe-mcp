@@ -2,7 +2,7 @@
 name: mailprobe
 description: Verify email addresses with the MailProbe tools. Use when the user asks whether an email address exists or can receive mail, wants a mailing list, a file of contacts or sign-up addresses cleaned before sending, or wants disposable, role-based or mistyped addresses found, for one address or for a whole list.
 license: MIT
-compatibility: Needs the MailProbe MCP server (remote, https://mailprobe.dev/mcp) and a MailProbe API key.
+compatibility: Needs a MailProbe MCP server, the remote one at https://mailprobe.dev/mcp or the local mailprobe-mcp npm package, and a MailProbe API key.
 ---
 
 # MailProbe
@@ -63,4 +63,4 @@ A refusal comes back as a sentence that says what to change.
 - **A domain that free credits do not cover.** The message names the domain, and nothing was charged. Take its addresses out of the call and tell the user: they are verified once the account has bought credits.
 - **Rate limit.** Wait the delay given, then send the same call.
 - **MailProbe could not complete the call.** Try once more, then report it.
-- **No API key, or a key that is refused.** In Claude Code with the MailProbe plugin, the key is the "MailProbe API key" option of the plugin: `/plugin configure mailprobe@mailprobe`, or `/plugin`, Installed tab, mailprobe, Configure options. Elsewhere it is the `Authorization: Bearer mp_live_...` header in the configuration of the MCP server. The user sets it there: never ask for the key in the conversation.
+- **No API key, or a key that is refused.** In Claude Code with the MailProbe plugin, the key is the "MailProbe API key" option of the plugin: `/plugin configure mailprobe@mailprobe`, or `/plugin`, Installed tab, mailprobe, Configure options. Elsewhere it is in the configuration of the MCP server: the `Authorization: Bearer mp_live_...` header for the remote server, the `MAILPROBE_API_KEY` variable for the local one. The user sets it there: never ask for the key in the conversation.

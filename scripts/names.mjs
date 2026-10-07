@@ -1,5 +1,5 @@
-// The names this repository gives to the MailProbe server and to its tools, read from
-// the README and from the skill: the tests and check-tools compare them.
+// The address of the remote MailProbe server, and the tools the README and the skill name:
+// the tests compare them with the tools of this package.
 
 export const SERVER_URL = 'https://mailprobe.dev/mcp';
 

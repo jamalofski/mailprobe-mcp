@@ -1,33 +1,45 @@
-// Compares the tools the README and the skill name with what the live MailProbe server
-// lists. `tools/list` needs no API key: the server answers it to anyone.
-import fs from 'node:fs/promises';
+// Compares the instructions and the tool definitions of this package with those of the
+// remote MailProbe server: an assistant must find the same tools on both. The remote
+// server answers `initialize` and `tools/list` without an API key.
+import assert from 'node:assert/strict';
 
-import { SERVER_URL, namedTools, readmeTools } from './names.mjs';
+import { INSTRUCTIONS, TOOLS } from '../src/tools.js';
+import { SERVER_URL } from './names.mjs';
 
-const read = (file) => fs.readFile(new URL(`../${file}`, import.meta.url), 'utf8');
-
-const response = await fetch(SERVER_URL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-  body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
-  signal: AbortSignal.timeout(30_000),
-});
-if (!response.ok) {
-  console.error(`${SERVER_URL} answered HTTP ${response.status}`);
-  process.exit(1);
+async function ask(method, params) {
+  const response = await fetch(SERVER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, ...(params ? { params } : {}) }),
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!response.ok) throw new Error(`${SERVER_URL} answered HTTP ${response.status} to ${method}`);
+  return (await response.json()).result;
 }
-const live = (await response.json()).result.tools.map((tool) => tool.name);
 
 let failed = false;
-for (const [where, named] of [
-  ['README.md', readmeTools(await read('README.md'))],
-  ['the skill', namedTools(await read('plugin/skills/mailprobe/SKILL.md'))],
-]) {
-  const missing = live.filter((name) => !named.includes(name));
-  const unknown = named.filter((name) => !live.includes(name));
-  if (missing.length > 0) console.error(`${where} does not name: ${missing.join(', ')}`);
-  if (unknown.length > 0) console.error(`${where} names tools the server does not have: ${unknown.join(', ')}`);
-  failed ||= missing.length > 0 || unknown.length > 0;
+const compare = (what, local, remote) => {
+  try {
+    assert.deepEqual(local, remote);
+  } catch (error) {
+    failed = true;
+    console.error(`${what} differ from the remote server:\n${error.message}\n`);
+  }
+};
+
+const { instructions } = await ask('initialize', {
+  protocolVersion: '2025-11-25',
+  capabilities: {},
+  clientInfo: { name: 'mailprobe-mcp-check-tools', version: '1' },
+});
+compare('The instructions', INSTRUCTIONS, instructions);
+
+const { tools } = await ask('tools/list');
+compare('The names of the tools', TOOLS.map((tool) => tool.name), tools.map((tool) => tool.name));
+for (const tool of TOOLS) {
+  const remote = tools.find((candidate) => candidate.name === tool.name);
+  if (remote) compare(`The definitions of ${tool.name}`, tool, remote);
 }
+
 if (failed) process.exit(1);
-console.log(`The README and the skill name the ${live.length} tools of the server: ${live.join(', ')}`);
+console.log(`The instructions and the ${TOOLS.length} tools are those of the remote server: ${TOOLS.map((tool) => tool.name).join(', ')}`);
