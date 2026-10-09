@@ -69,6 +69,8 @@ The plugin connects Claude Code to the remote server and adds a skill that tells
 
 Claude Code asks for the API key when the plugin is enabled, and keeps it in the credential store of the system, not in a settings file. To set it later, run `/plugin configure mailprobe@mailprobe`, or open `/plugin`, **Installed** tab, mailprobe, **Configure options**. A remote server you added by hand at the same address takes precedence over the one of the plugin.
 
+For another agent that loads `SKILL.md` skills, add one of the two servers above and take the skill alone: [`plugin/skills/mailprobe/SKILL.md`](plugin/skills/mailprobe/SKILL.md) in this repository, also listed on [Agensi](https://www.agensi.io/skills/mailprobe-verify-email-addresses-from-your-agent).
+
 Then ask for what you need: "does jane@example.com exist?", "check the addresses of contacts.csv before I send the newsletter", "which of these sign-ups are disposable?".
 
 ## Tools
@@ -126,11 +128,13 @@ check the manifests, then start a session with the plugin loaded from the folder
 1. Set the version in `package.json` and `plugin/.claude-plugin/plugin.json`, and date its section in `CHANGELOG.md`.
 2. Run `npm test` and `npm run check-tools`.
 3. Commit, then push a tag named after the version: the **Publish** workflow publishes the package to npm through Trusted Publishing, with a provenance statement.
+4. When the skill changed, upload it again to its [Agensi listing](https://www.agensi.io/skills/mailprobe-verify-email-addresses-from-your-agent), as a new version: a ZIP of a `mailprobe/` folder that holds the `SKILL.md`. Nothing updates the listing from this repository.
 
 ## Resources
 
 - [MailProbe API documentation](https://mailprobe.dev/api-docs/)
 - [MCP setup on mailprobe.dev](https://mailprobe.dev/api-docs/#mcp)
+- [MailProbe skill on Agensi](https://www.agensi.io/skills/mailprobe-verify-email-addresses-from-your-agent)
 - [Model Context Protocol specification](https://modelcontextprotocol.io/specification/2026-07-28)
 
 ## Support
