@@ -19,7 +19,7 @@ The MailProbe tools check, in real time, whether email addresses exist and can r
 
 | Tool | What it does | To know |
 |---|---|---|
-| `verify_emails` | Verifies 1 to 20 addresses | One result per address, in the order given. A call can take up to 95 seconds |
+| `verify_emails` | Verifies 1 to 20 addresses | One result per address, in the order given. A call answers within about 55 seconds with the remote server, 95 with the local one |
 | `get_credits` | Returns the credits left on the account | Free |
 
 ## Reading a result
@@ -42,7 +42,8 @@ Act on `status`, not on `score`:
 ## What is charged
 
 - One credit per address probed, whatever the verdict.
-- Free: an address repeated in the same call, an entry that is not a well-formed address, an address that came back `unknown` with `timeout`, and one whose server refused the connection (`policy_rejected`, `no_banner`, `ehlo_rejected`, `mail_from_rejected`).
+- Free: an address repeated in the same call, an entry that is not a well-formed address, an address that had no verdict yet when the call answered (it comes back `unknown` with `timeout`), and one whose server refused the connection (`policy_rejected`, `no_banner`, `ehlo_rejected`, `mail_from_rejected`).
+- A `timeout` is charged when the mail servers of the domain were all tried and stayed silent. To know what a call cost, compare `get_credits` before and after.
 - A retry is a new probe: it costs a credit again. Before retrying more than a few addresses, tell the user how many.
 
 ## A list
