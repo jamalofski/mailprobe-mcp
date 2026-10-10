@@ -19,7 +19,7 @@ The MailProbe tools check, in real time, whether email addresses exist and can r
 
 | Tool | What it does | To know |
 |---|---|---|
-| `verify_emails` | Verifies 1 to 20 addresses | One result per address, in the order given. A call answers within about 55 seconds with the remote server, 95 with the local one |
+| `verify_emails` | Verifies 1 to 20 addresses | One result per address, in the order given. A call answers within about 55 seconds |
 | `get_credits` | Returns the credits left on the account | Free |
 
 ## Reading a result

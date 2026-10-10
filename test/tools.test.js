@@ -6,15 +6,17 @@ import { createClient } from '../src/api.js';
 import { MAX_EMAILS, createTools } from '../src/tools.js';
 import { CREDITS, entry, fakeApi } from './helpers.js';
 
-/** The tools wired to a fake API, with waits that do not wait. */
+/** The tools wired to a fake API, with waits that do not wait: they move the clock of the client. */
 async function setup({ respond, hasKey = true } = {}) {
   const api = await fakeApi(respond);
   const waits = [];
+  let clock = 0;
   const client = createClient({
     apiKey: 'mp_live_test',
     baseUrl: api.url,
     userAgent: 'mailprobe-mcp/test',
-    wait: async (ms) => { waits.push(ms); },
+    wait: async (ms) => { waits.push(ms); clock += ms; },
+    now: () => clock,
   });
   const { tools, callTool } = createTools({ api: client, hasKey });
   return {
@@ -29,7 +31,7 @@ async function setup({ respond, hasKey = true } = {}) {
 const text = (result) => result.content[0].text;
 const verifications = (api) => api.calls.filter((call) => call.method === 'POST');
 
-test('verify_emails sends the addresses as they are and returns one result per address, in order', async () => {
+test('verify_emails sends the addresses as they are, asks for an answer within 55 seconds and returns one result per address, in order', async () => {
   const t = await setup();
   try {
     const emails = ['Jane@Example.com', 'info@example.org', 'jane@example.com'];
@@ -39,7 +41,8 @@ test('verify_emails sends the addresses as they are and returns one result per a
     assert.deepEqual(JSON.parse(text(result)), result.structuredContent);
     const [call] = t.api.calls;
     assert.equal(`${call.method} ${call.path}`, 'POST /api/v1/verify');
-    assert.deepEqual(call.json, { emails });
+    // MCP clients give up on a tool call after a minute: the API is asked to answer before.
+    assert.deepEqual(call.json, { emails, timeout: 55 });
     assert.equal(call.headers.authorization, 'Bearer mp_live_test');
     assert.equal(call.headers['user-agent'], 'mailprobe-mcp/test');
     assert.equal(call.headers['content-type'], 'application/json');
@@ -149,6 +152,24 @@ test('a rate limit with a short delay is waited out, then the verification goes 
     assert.deepEqual(t.waits, [3000, 3000]);
     // The same addresses are sent again at each attempt.
     assert.deepEqual(verifications(t.api).map((call) => call.json.emails), [['jane@example.com'], ['jane@example.com'], ['jane@example.com']]);
+    // The waits count in the 55 seconds of the call: each attempt asks for the time that is left.
+    assert.deepEqual(verifications(t.api).map((call) => call.json.timeout), [55, 52, 49]);
+  } finally {
+    await t.close();
+  }
+});
+
+test('a wait that would leave no time to verify is not waited out: the delay goes to the model', async () => {
+  const t = await setup({
+    respond: () => ({ status: 429, body: { error: 'Rate limit exceeded. Max 60 requests per minute.', code: 'RATE_LIMITED' }, headers: { 'retry-after': '30' } }),
+  });
+  try {
+    const result = await t.call('verify_emails', { emails: ['jane@example.com'] });
+    assert.equal(result.isError, true);
+    assert.equal(text(result), 'Rate limit exceeded. Max 60 requests per minute. Retry in 30 seconds.');
+    // One wait of 30 seconds fits in the 55 seconds of the call, a second one does not.
+    assert.deepEqual(t.waits, [30_000]);
+    assert.deepEqual(verifications(t.api).map((call) => call.json.timeout), [55, 25]);
   } finally {
     await t.close();
   }
