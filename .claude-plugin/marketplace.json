@@ -10,7 +10,7 @@
     {
       "name": "mailprobe",
       "source": "./plugin",
-      "description": "Verify email addresses in real time from your assistant: deliverability, disposable and role addresses, typo fixes. Nothing is sent to the address. Hosted in France.",
+      "description": "Verify email addresses in real time from your assistant: deliverability, disposable and role addresses, typo fixes. Nothing is sent to the address. Hosted in the EU (France).",
       "category": "productivity"
     }
   ]
